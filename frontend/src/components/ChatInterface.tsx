@@ -34,7 +34,9 @@ const ChatInterface = () => {
 
     try {
       // Make API call to /api/chat endpoint
-      const response = await fetch('http://localhost:3001/api/chat', {
+      // Use environment variable for API URL, fallback to localhost for development
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

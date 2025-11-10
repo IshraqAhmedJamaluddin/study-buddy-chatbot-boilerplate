@@ -10,7 +10,23 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+// CORS configuration - allow requests from frontend URL or localhost for development
+const allowedOrigins = process.env.FRONTEND_URL 
+  ? [process.env.FRONTEND_URL, 'http://localhost:3000']
+  : ['http://localhost:3000'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || !process.env.FRONTEND_URL) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Health check endpoint
@@ -75,7 +91,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Study Buddy backend server running on http://localhost:${PORT}`);
+// Listen on 0.0.0.0 to accept connections from Railway
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Study Buddy backend server running on port ${PORT}`);
 });
 

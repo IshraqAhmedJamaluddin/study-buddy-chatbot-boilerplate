@@ -179,6 +179,27 @@ You will submit your work via Pull Request:
 4. I will review and grade your PR
 5. Note: PRs will be reviewed but not merged to preserve the original boilerplate
 
+## Deployment
+
+This project uses a hybrid deployment strategy:
+- **Backend**: Hosted on Railway
+- **Frontend**: Hosted on GitHub Pages
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+### Quick Setup
+
+1. **Backend (Railway):**
+   - Deploy from GitHub repo
+   - Set root directory to `backend`
+   - Add environment variables: `GEMINI_API_KEY`, `FRONTEND_URL`
+
+2. **Frontend (GitHub Pages):**
+   - Enable GitHub Pages in repository settings
+   - Set source to "GitHub Actions"
+   - Add `VITE_API_URL` as a GitHub Secret with your Railway backend URL
+   - The workflow will automatically deploy on push to main/master
+
 ## Resources
 
 - Git Documentation: https://git-scm.com/doc
