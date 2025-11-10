@@ -33,30 +33,43 @@ const ChatInterface = () => {
     setLoading(true);
 
     try {
-      // TODO: Make API call to /api/chat endpoint
-      // You will need to:
-      // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
-      // 2. Send the user's message in the request body: { message: input }
-      // 3. Handle the response from the backend
-      // 4. Create a bot message with the response
-      // 5. Add the bot message to the messages state
+      // Make API call to /api/chat endpoint
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage.text }),
+      });
 
-      // Placeholder: Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
 
+      const data = await response.json();
+
+      // Create a bot message with the response
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
+        text: data.response || 'No response received from the server.',
         sender: 'bot',
         timestamp: new Date(),
       };
 
+      // Add the bot message to the messages state
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Create an error message with more specific error information
+      const errorText = error instanceof Error 
+        ? `Error: ${error.message}` 
+        : 'Error: Could not get response from server. Check your backend connection.';
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Error: Could not get response from server. Check your backend connection.',
+        text: errorText,
         sender: 'bot',
         timestamp: new Date(),
       };
