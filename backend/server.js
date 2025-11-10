@@ -39,7 +39,7 @@ app.post('/api/chat', async (req, res) => {
 
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Make API call to Gemini
     const prompt = `You are Study Buddy, a helpful AI assistant for ITI students. 
