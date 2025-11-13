@@ -30,3 +30,12 @@ Thumbs.db
 # Vite
 .vite/
 
+# Ignore Visual Studio files
+.vs/
+*.vsidx
+*.suo
+*.user
+*.cache
+*.log
+
+

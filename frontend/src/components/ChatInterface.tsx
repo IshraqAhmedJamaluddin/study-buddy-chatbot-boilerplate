@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   Box,
   TextField,
@@ -36,10 +36,39 @@ const ChatInterface = () => {
       // TODO: Make API call to /api/chat endpoint
       // You will need to:
       // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
+       const response = await fetch("http://localhost:3001/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    
       // 2. Send the user's message in the request body: { message: input }
+      body: JSON.stringify({ message: input }), // ✅ 2. Send user's message
+  });
       // 3. Handle the response from the backend
+      const data = await response.json();
       // 4. Create a bot message with the response
+      const botMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    text: data.reply || "No response from the AI.",
+    sender: "bot",
+    timestamp: new Date(),
+  };
       // 5. Add the bot message to the messages state
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+} catch (error) {
+  console.error("Error calling /api/chat:", error);
+
+  // Fallback error message
+  const errorMessage: Message = {
+    id: (Date.now() + 1).toString(),
+    text: "⚠️ Sorry, something went wrong while contacting the AI.",
+    sender: "bot",
+    timestamp: new Date(),
+  };
+
+  setMessages((prevMessages) => [...prevMessages, errorMessage]);
+}
 
       // Placeholder: Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
