@@ -27,19 +27,8 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // Get Gemini API key from environment variable
-    // dotenv.config() is already called at the top of the file, so use process.env
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error('GEMINI_API_KEY is not set. Make sure .env contains GEMINI_API_KEY.');
-      return res.status(500).json({ error: 'Server configuration error: missing API key' });
-    }
-    console.info('The Message is Sent to Gemini API');
-    const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: message,
-  });
-  console.log(response.text);
+    // TODO: Get Gemini API key from environment variable
+    // const apiKey = process.env.GEMINI_API_KEY;
 
     // TODO: Make API call to Gemini
     // You will need to:
