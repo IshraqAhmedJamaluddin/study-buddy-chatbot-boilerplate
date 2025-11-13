@@ -1,9 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Initialize the GoogleGenerativeAI SDK
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error('Error: GEMINI_API_KEY is not set. Please add it to your .env file.');
+  process.exit(1);
+}
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,8 +37,6 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // TODO: Get Gemini API key from environment variable
-    // const apiKey = process.env.GEMINI_API_KEY;
 
     // TODO: Make API call to Gemini
     // You will need to:
