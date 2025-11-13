@@ -34,22 +34,27 @@ const ChatInterface = () => {
 
     try {
       // TODO: Make API call to /api/chat endpoint
-      // You will need to:
-      // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
-      // 2. Send the user's message in the request body: { message: input }
-      // 3. Handle the response from the backend
-      // 4. Create a bot message with the response
-      // 5. Add the bot message to the messages state
+      const response = await fetch('http://localhost:3001/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: input }),
+    });
 
-      // Placeholder: Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
 
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
-        sender: 'bot',
-        timestamp: new Date(),
-      };
+    const data = await response.json();
+
+    // Create bot message from backend response
+    const botMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      text: data.response || data.reply || 'No response from server.',
+      sender: 'bot',
+      timestamp: new Date(),
+    };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
