@@ -10,15 +10,8 @@ import {
   ListItemText,
   CircularProgress,
   Avatar,
-  Drawer,
-  IconButton,
-  Divider,
-  Tooltip,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import AddIcon from '@mui/icons-material/Add';
-import MenuIcon from '@mui/icons-material/Menu';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown';
 import { Message, Thread } from '../types';
 
@@ -33,55 +26,18 @@ const generateThreadTitle = (firstMessage: string): string => {
   return title || 'New Chat';
 };
 
-const ChatInterface = () => {
-  const [threads, setThreads] = useState<Thread[]>([]);
-  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+interface ChatInterfaceProps {
+  currentThreadId: string | null;
+  threads: Thread[];
+  setThreads: (threads: Thread[] | ((prev: Thread[]) => Thread[])) => void;
+  setCurrentThreadId: (id: string | null) => void;
+}
+
+const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadId }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const currentThread = threads.find((t) => t.id === currentThreadId);
-
-  // Load threads from localStorage on mount
-  useEffect(() => {
-    const savedThreads = localStorage.getItem(THREADS_STORAGE_KEY);
-    const savedCurrentThread = localStorage.getItem(CURRENT_THREAD_KEY);
-
-    if (savedThreads) {
-      try {
-        const parsed = JSON.parse(savedThreads);
-        const threadsWithDates = parsed.map((thread: Thread) => ({
-          ...thread,
-          createdAt: new Date(thread.createdAt),
-          updatedAt: new Date(thread.updatedAt),
-          messages: thread.messages.map((msg: Message) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })),
-        }));
-        setThreads(threadsWithDates);
-
-        // Restore current thread if it exists
-        if (savedCurrentThread && threadsWithDates.find((t: Thread) => t.id === savedCurrentThread)) {
-          setCurrentThreadId(savedCurrentThread);
-          const thread = threadsWithDates.find((t: Thread) => t.id === savedCurrentThread);
-          if (thread) {
-            setMessages(thread.messages);
-          }
-        } else if (threadsWithDates.length > 0) {
-          // Load the most recent thread
-          const mostRecent = threadsWithDates.sort(
-            (a: Thread, b: Thread) => b.updatedAt.getTime() - a.updatedAt.getTime()
-          )[0];
-          setCurrentThreadId(mostRecent.id);
-          setMessages(mostRecent.messages);
-        }
-      } catch (error) {
-        console.error('Error loading threads:', error);
-      }
-    }
-  }, []);
 
   // Save threads to localStorage whenever threads change
   useEffect(() => {
@@ -111,43 +67,6 @@ const ChatInterface = () => {
     }
   }, [currentThreadId, threads]);
 
-  const createNewThread = () => {
-    const newThread: Thread = {
-      id: generateThreadId(),
-      title: 'New Chat',
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setThreads((prev) => [newThread, ...prev]);
-    setCurrentThreadId(newThread.id);
-    setMessages([]);
-    setSidebarOpen(false);
-  };
-
-  const switchThread = (threadId: string) => {
-    setCurrentThreadId(threadId);
-    setSidebarOpen(false);
-  };
-
-  const deleteThread = (threadId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const updatedThreads = threads.filter((t) => t.id !== threadId);
-    setThreads(updatedThreads);
-
-    if (currentThreadId === threadId) {
-      if (updatedThreads.length > 0) {
-        const mostRecent = updatedThreads.sort(
-          (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
-        )[0];
-        setCurrentThreadId(mostRecent.id);
-        setMessages(mostRecent.messages);
-      } else {
-        setCurrentThreadId(null);
-        setMessages([]);
-      }
-    }
-  };
 
   const updateThread = (threadId: string, newMessages: Message[], title?: string) => {
     setThreads((prev) =>
@@ -191,6 +110,8 @@ const ChatInterface = () => {
       setThreads((prev) => [newThread, ...prev]);
       threadId = newThread.id;
       setCurrentThreadId(threadId);
+      localStorage.setItem(THREADS_STORAGE_KEY, JSON.stringify([newThread, ...threads]));
+      localStorage.setItem(CURRENT_THREAD_KEY, threadId);
     }
 
     const updatedMessages = [...messages, userMessage];
@@ -202,7 +123,7 @@ const ChatInterface = () => {
     setLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
 
       // Prepare conversation history for context (last 10 messages to avoid token limits)
       const conversationHistory = updatedMessages
@@ -244,11 +165,11 @@ const ChatInterface = () => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-
-      const errorText = error instanceof Error
-        ? `Error: ${error.message}`
+      
+      const errorText = error instanceof Error 
+        ? `Error: ${error.message}` 
         : 'Error: Could not get response from server. Check your backend connection.';
-
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: errorText,
@@ -273,191 +194,24 @@ const ChatInterface = () => {
     }
   };
 
-  const drawerWidth = 280;
-
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 200px)' }}>
-      {/* Sidebar Drawer */}
-      <Drawer
-        variant="persistent"
-        open={sidebarOpen}
-        sx={{
-          width: sidebarOpen ? drawerWidth : 0,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRight: '1px solid rgba(0, 0, 0, 0.1)',
-          },
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#667eea' }}>
-              Chats
-            </Typography>
-            <Tooltip title="New Chat">
-              <IconButton
-                onClick={createNewThread}
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                  },
-                }}
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Button
-            fullWidth
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={createNewThread}
-            sx={{
-              mb: 2,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': {
-                background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-              },
-            }}
-          >
-            New Chat
-          </Button>
-          <Divider sx={{ mb: 2 }} />
-          <List sx={{ overflow: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
-            {threads.length === 0 ? (
-              <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 2 }}>
-                No chats yet. Start a new conversation!
-              </Typography>
-            ) : (
-              threads
-                .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-                .map((thread) => (
-                  <ListItem
-                    key={thread.id}
-                    onClick={() => switchThread(thread.id)}
-                    sx={{
-                      mb: 1,
-                      borderRadius: 2,
-                      cursor: 'pointer',
-                      background: currentThreadId === thread.id
-                        ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'
-                        : 'transparent',
-                      border: currentThreadId === thread.id ? '2px solid #667eea' : '2px solid transparent',
-                      '&:hover': {
-                        background: 'rgba(102, 126, 234, 0.05)',
-                      },
-                    }}
-                  >
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: currentThreadId === thread.id ? 600 : 400,
-                            color: currentThreadId === thread.id ? '#667eea' : 'text.primary',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            flex: 1,
-                          }}
-                        >
-                          {thread.title}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => deleteThread(thread.id, e)}
-                          sx={{
-                            ml: 1,
-                            color: 'error.main',
-                            '&:hover': {
-                              background: 'rgba(211, 47, 47, 0.1)',
-                            },
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: 'text.secondary',
-                          display: 'block',
-                          mt: 0.5,
-                        }}
-                      >
-                        {thread.messages.length} messages
-                      </Typography>
-                    </Box>
-                  </ListItem>
-                ))
-            )}
-          </List>
-        </Box>
-      </Drawer>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 200px)' }}>
 
-      {/* Main Chat Area */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          ml: sidebarOpen ? 0 : 0,
-          transition: 'margin 0.3s ease',
-        }}
-      >
-        {/* Header with menu button */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <IconButton
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            sx={{
-              color: 'white',
-              background: 'rgba(255, 255, 255, 0.2)',
-              '&:hover': {
-                background: 'rgba(255, 255, 255, 0.3)',
-              },
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          {currentThread && (
-            <Typography
-              variant="h6"
-              sx={{
-                ml: 2,
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontWeight: 600,
-                textShadow: '0 2px 10px rgba(0,0,0,0.2)',
-              }}
-            >
-              {currentThread.title}
-            </Typography>
-          )}
-        </Box>
-
-        <Paper
+      <Paper
           elevation={8}
-          sx={{
-            flex: 1,
-            overflow: 'auto',
-            mb: 2,
-            p: 2,
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          mb: 2,
+          p: 2,
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
             borderRadius: 4,
             border: '1px solid rgba(255, 255, 255, 0.3)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          {messages.length === 0 ? (
+        }}
+      >
+        {messages.length === 0 ? (
             <Box sx={{ textAlign: 'center', mt: 8 }}>
               <Typography
                 variant="h4"
@@ -485,15 +239,15 @@ const ChatInterface = () => {
               </Typography>
               <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                 Start a purrfect conversation with Whiskers!
-              </Typography>
-            </Box>
-          ) : (
+            </Typography>
+          </Box>
+        ) : (
             <List sx={{ py: 0 }}>
-              {messages.map((message) => (
-                <ListItem
-                  key={message.id}
-                  sx={{
-                    justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
+            {messages.map((message) => (
+              <ListItem
+                key={message.id}
+                sx={{
+                  justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
                     mb: 2,
                     alignItems: 'flex-end',
                   }}
@@ -512,11 +266,11 @@ const ChatInterface = () => {
                       🐱
                     </Avatar>
                   )}
-                  <Paper
+                <Paper
                     elevation={2}
-                    sx={{
-                      p: 2,
-                      maxWidth: '70%',
+                  sx={{
+                    p: 2,
+                    maxWidth: '70%',
                       borderRadius: 3,
                       background: message.sender === 'user'
                         ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
@@ -612,19 +366,19 @@ const ChatInterface = () => {
                         </Typography>
                       </Box>
                     ) : (
-                      <ListItemText
-                        primary={message.text}
-                        secondary={message.timestamp.toLocaleTimeString()}
+                  <ListItemText
+                    primary={message.text}
+                    secondary={message.timestamp.toLocaleTimeString()}
                         primaryTypographyProps={{
                           sx: { wordBreak: 'break-word', lineHeight: 1.6 },
                         }}
-                        secondaryTypographyProps={{
+                    secondaryTypographyProps={{
                           color: 'rgba(255,255,255,0.8)',
                           fontSize: '0.75rem',
-                        }}
-                      />
+                    }}
+                  />
                     )}
-                  </Paper>
+                </Paper>
                   {message.sender === 'user' && (
                     <Avatar
                       sx={{
@@ -638,9 +392,9 @@ const ChatInterface = () => {
                       👤
                     </Avatar>
                   )}
-                </ListItem>
-              ))}
-              {loading && (
+              </ListItem>
+            ))}
+            {loading && (
                 <ListItem sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
                   <Avatar
                     sx={{
@@ -659,20 +413,20 @@ const ChatInterface = () => {
                       Thinking...
                     </Typography>
                   </Box>
-                </ListItem>
-              )}
-            </List>
-          )}
-        </Paper>
+              </ListItem>
+            )}
+          </List>
+        )}
+      </Paper>
         <Box sx={{ display: 'flex', gap: 1.5 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
+        <TextField
+          fullWidth
+          variant="outlined"
             placeholder="Type your message... 🐾"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={loading}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          disabled={loading}
             sx={{
               '& .MuiOutlinedInput-root': {
                 background: 'rgba(255, 255, 255, 0.95)',
@@ -690,12 +444,12 @@ const ChatInterface = () => {
                 },
               },
             }}
-          />
-          <Button
-            variant="contained"
-            endIcon={<SendIcon />}
-            onClick={handleSend}
-            disabled={loading || !input.trim()}
+        />
+        <Button
+          variant="contained"
+          endIcon={<SendIcon />}
+          onClick={handleSend}
+          disabled={loading || !input.trim()}
             sx={{
               minWidth: 120,
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -713,12 +467,11 @@ const ChatInterface = () => {
               },
               transition: 'all 0.3s ease',
             }}
-          >
-            Send
-          </Button>
+        >
+          Send
+        </Button>
         </Box>
       </Box>
-    </Box>
   );
 };
 
