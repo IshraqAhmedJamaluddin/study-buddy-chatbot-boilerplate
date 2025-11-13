@@ -41,16 +41,30 @@ const ChatInterface = () => {
       // 4. Create a bot message with the response
       // 5. Add the bot message to the messages state
 
-      // Placeholder: Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // ✅ Make API call to /api/chat endpoint
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage.text }),
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // ✅ Create a bot message with the real response from Gemini
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
+        text: data.response || 'No response received from AI.',
         sender: 'bot',
         timestamp: new Date(),
       };
 
+      // Add bot message to chat
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -153,4 +167,3 @@ const ChatInterface = () => {
 };
 
 export default ChatInterface;
-
