@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -27,28 +28,35 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // TODO: Get Gemini API key from environment variable
-    // const apiKey = process.env.GEMINI_API_KEY;
+    // ✅ Get Gemini API key from environment variable
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    // TODO: Make API call to Gemini
-    // You will need to:
-    // 1. Import the necessary Gemini SDK (e.g., @google/generative-ai)
-    // 2. Initialize the GoogleGenerativeAI client with your API key
-    // 3. Get a model instance (recommended: 'gemini-2.5-flash')
-    // 4. Construct a prompt with the user's message
-    // 5. Call generateContent() with the prompt
-    // 6. Extract the response text from the result
-    // 7. Handle any errors that may occur
+    console.log('Using Gemini API Key:', apiKey ? 'Provided' : 'Not Provided');
+    console.log('Received apikey:', apiKey);
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Gemini API key not configured in environment variables' });
+    }
 
-    // TODO: Return the chatbot response
-    // For now, return a placeholder response
-    const placeholderResponse = {
-      response: 'This is a placeholder response. Implement Gemini API integration here.'
-    };
+    // ✅ Initialize the Gemini client
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-    res.json(placeholderResponse);
+    // ✅ Get the model instance (recommended: 'gemini-2.5-flash')
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    // ✅ Construct the prompt with the user's message
+    const prompt = `You are Study Buddy, a helpful educational assistant. Respond to the following student query:\n\n"${message}"`;
+
+    // ✅ Generate the response
+    const result = await model.generateContent(prompt);
+
+    // ✅ Extract the response text
+    const responseText = result.response.text();
+
+    // ✅ Return the chatbot response
+    res.json({ response: responseText });
+    console.log(responseText);
   } catch (error) {
-    console.error('Error in chat endpoint:', error);
+    console.error('Error in chat endpoint:', error.message, error.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -57,4 +65,3 @@ app.post('/api/chat', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Study Buddy backend server running on http://localhost:${PORT}`);
 });
-
