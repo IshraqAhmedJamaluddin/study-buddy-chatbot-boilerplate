@@ -27,26 +27,23 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // TODO: Get Gemini API key from environment variable
-    // const apiKey = process.env.GEMINI_API_KEY;
+    // Get Gemini API key from environment
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Gemini API key not configured' });
+    }
 
-    // TODO: Make API call to Gemini
-    // You will need to:
-    // 1. Import the necessary Gemini SDK (e.g., @google/generative-ai)
-    // 2. Initialize the GoogleGenerativeAI client with your API key
-    // 3. Get a model instance (recommended: 'gemini-2.5-flash')
-    // 4. Construct a prompt with the user's message
-    // 5. Call generateContent() with the prompt
-    // 6. Extract the response text from the result
-    // 7. Handle any errors that may occur
+    // Initialize Gemini client
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-    // TODO: Return the chatbot response
-    // For now, return a placeholder response
-    const placeholderResponse = {
-      response: 'This is a placeholder response. Implement Gemini API integration here.'
-    };
+    // Choose model (recommended: gemini-2.0-flash or gemini-pro)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-    res.json(placeholderResponse);
+    // Generate response
+    const result = await model.generateContent(message);
+    const responseText = result.response.text();
+
+    res.json({ response: responseText });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     res.status(500).json({ error: 'Internal server error' });
