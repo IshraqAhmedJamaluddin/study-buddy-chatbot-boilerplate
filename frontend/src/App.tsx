@@ -311,7 +311,7 @@ function App() {
                   filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))',
                 }}
               >
-                🐱 Whiskers | Your Study Buddy 🐱
+                🐱 Whiskers - Your Study Buddy 🐱
         </Typography>
             </Box>
             <Typography
