@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
+import { GoogleGenAI } from "@google/genai";
 // Load environment variables from .env file
 dotenv.config();
 
@@ -34,6 +34,12 @@ app.post('/api/chat', async (req, res) => {
       console.error('GEMINI_API_KEY is not set. Make sure .env contains GEMINI_API_KEY.');
       return res.status(500).json({ error: 'Server configuration error: missing API key' });
     }
+    console.info('The Message is Sent to Gemini API');
+    const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: message,
+  });
+  console.log(response.text);
 
     // TODO: Make API call to Gemini
     // You will need to:
@@ -48,8 +54,7 @@ app.post('/api/chat', async (req, res) => {
     // TODO: Return the chatbot response
     // For now, return a placeholder response
     const placeholderResponse = {
-      response: 'This is a placeholder response. Implement Gemini API integration here.'
-    };
+      response: response.text};
 
     res.json(placeholderResponse);
   } catch (error) {
