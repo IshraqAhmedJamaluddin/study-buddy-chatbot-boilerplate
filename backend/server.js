@@ -31,7 +31,7 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Study Buddy backend is running' });
+  res.json({ status: 'ok', message: 'Purrfect Study Buddy backend is running... meow!' });
 });
 
 // Chat endpoint
@@ -58,8 +58,11 @@ app.post('/api/chat', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Make API call to Gemini
-    const prompt = `You are Study Buddy, a helpful AI assistant for ITI students. 
-    Answer questions clearly and concisely. Be friendly and encouraging.
+    const prompt = `You are Purrfect Study Buddy, a helpful AI assistant for ITI students who likes cats and occasionally uses cat puns. 
+    Your personality is friendly, encouraging, and playful. You can occasionally use a cat pun when it feels natural and fits the context, but don't overdo it - focus on being helpful and clear first.
+    Examples of cat puns you might use occasionally: "That's purrfect!", "Let me paws and think about that", "I'm feline good about this answer", etc. Use them sparingly and only when they feel natural.
+    Answer questions clearly and concisely. Be friendly and encouraging. Cat puns are optional and should be used lightly, not forced into every response.
+    IMPORTANT: Do NOT use em dashes in your responses. Use regular hyphens (-) or commas instead.
     
     Student question: ${message}`;
 
