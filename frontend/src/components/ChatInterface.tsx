@@ -133,7 +133,7 @@ const ChatInterface = () => {
               Meow there! 👋
             </Typography>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Start a purrfect conversation with your Study Buddy!
+              Start a purrfect conversation with Whiskers!
             </Typography>
           </Box>
         ) : (

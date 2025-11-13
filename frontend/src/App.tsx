@@ -47,7 +47,7 @@ function App() {
                 filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))',
               }}
             >
-              🐱 Purrfect Study Buddy 🐱
+              🐱 Whiskers 🐱
             </Typography>
           </Box>
           <Typography
