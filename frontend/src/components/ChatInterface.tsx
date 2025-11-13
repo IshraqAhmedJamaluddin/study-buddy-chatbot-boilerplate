@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   Box,
   TextField,
@@ -21,6 +21,7 @@ const ChatInterface = () => {
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
+    /** User message */
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
@@ -33,33 +34,35 @@ const ChatInterface = () => {
     setLoading(true);
 
     try {
-      // TODO: Make API call to /api/chat endpoint
-      // You will need to:
-      // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
-      // 2. Send the user's message in the request body: { message: input }
-      // 3. Handle the response from the backend
-      // 4. Create a bot message with the response
-      // 5. Add the bot message to the messages state
+      /** API call to backend */
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input }),
+      });
 
-      // Placeholder: Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const data = await response.json();
 
+      /** Bot message from API */
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
+        text: data.response || 'No response from the AI.',
         sender: 'bot',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error sending message:', error);
+
+      /** Error fallback message */
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Error: Could not get response from server. Check your backend connection.',
+        text: '⚠️ Could not get response from server. Check your backend connection.',
         sender: 'bot',
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -153,4 +156,3 @@ const ChatInterface = () => {
 };
 
 export default ChatInterface;
-
