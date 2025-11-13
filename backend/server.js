@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -27,26 +28,34 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // TODO: Get Gemini API key from environment variable
-    // const apiKey = process.env.GEMINI_API_KEY;
+    // Get Gemini API key from environment variable
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is not set');
+    }
 
-    // TODO: Make API call to Gemini
-    // You will need to:
-    // 1. Import the necessary Gemini SDK (e.g., @google/generative-ai)
-    // 2. Initialize the GoogleGenerativeAI client with your API key
-    // 3. Get a model instance (recommended: 'gemini-2.5-flash')
-    // 4. Construct a prompt with the user's message
-    // 5. Call generateContent() with the prompt
-    // 6. Extract the response text from the result
-    // 7. Handle any errors that may occur
+    // Initialize the Gemini client
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
-    // TODO: Return the chatbot response
-    // For now, return a placeholder response
-    const placeholderResponse = {
-      response: 'This is a placeholder response. Implement Gemini API integration here.'
-    };
+    // Generate content with system instruction as part of the user message
+    const result = await model.generateContent({
+      contents: [
+        { 
+          role: 'user', 
+          parts: [
+            { text: 'You are a helpful study assistant. Provide responses in plain text format only, without any markdown formatting or special characters. ' + message }
+          ]
+        }
+      ]
+    });
 
-    res.json(placeholderResponse);
+    // Get the response text
+    const response = await result.response;
+    const textResponse = response.text();
+
+    // Return the plain text response
+    res.json({ response: textResponse });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     res.status(500).json({ error: 'Internal server error' });

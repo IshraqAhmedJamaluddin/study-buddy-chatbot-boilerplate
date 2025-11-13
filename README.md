@@ -14,6 +14,23 @@ This project consists of:
 
 You will implement the integration with Google's Gemini API to make the chatbot functional.
 
+## Implemented Features
+
+- **Backend: Gemini 2.5 Pro integration**
+  - Uses `@google/generative-ai` with model `gemini-2.5-pro`.
+  - Reads API key from `backend/.env` as `GEMINI_API_KEY`.
+  - Ensures responses are plain text.
+  - Public endpoint: `POST http://localhost:3001/api/chat`.
+
+- **Frontend UI customization**
+  - Chat interface renders server responses as plain text.
+  - Minor layout and readability refinements.
+  - Changes primarily in `frontend/src/components/ChatInterface.tsx`.
+
+- **Testing**
+  - Example request body: `{ "message": "Explain recursion simply." }`
+  - Example response shape: `{ "response": "..." }`
+
 ## Prerequisites
 
 Before you begin, make sure you have:
@@ -214,4 +231,3 @@ You will submit your work via Pull Request:
 - Pull Requests are for discussion and review, not just submission.
 
 Good luck, and happy coding!
-
