@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -29,6 +30,13 @@ app.post('/api/chat', async (req, res) => {
 
     // TODO: Get Gemini API key from environment variable
     // const apiKey = process.env.GEMINI_API_KEY;
+
+    // Get Gemini API key from environment variable
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Missing Gemini API key on server' });
+    }
 
     // TODO: Make API call to Gemini
     // You will need to:
