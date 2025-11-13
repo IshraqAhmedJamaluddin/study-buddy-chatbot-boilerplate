@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai'; // step 1: import SDK
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -38,15 +40,16 @@ if (!apiKey) {
 }
 
 
-    // TODO: Make API call to Gemini
-    // You will need to:
-    // 1. Import the necessary Gemini SDK (e.g., @google/generative-ai)
-    // 2. Initialize the GoogleGenerativeAI client with your API key
-    // 3. Get a model instance (recommended: 'gemini-2.5-flash')
-    // 4. Construct a prompt with the user's message
-    // 5. Call generateContent() with the prompt
-    // 6. Extract the response text from the result
-    // 7. Handle any errors that may occur
+   // Step 2: Initialize Gemini client using API key from environment variables
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error('❌ Missing GEMINI_API_KEY in environment variables');
+  process.exit(1);
+}
+
+const client = new GoogleGenerativeAI({ apiKey });
+console.log('✅ Gemini API client initialized:', !!client);
+
 
     // TODO: Return the chatbot response
     // For now, return a placeholder response
