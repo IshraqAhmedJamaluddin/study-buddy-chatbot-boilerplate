@@ -5,3 +5,11 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface Thread {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+

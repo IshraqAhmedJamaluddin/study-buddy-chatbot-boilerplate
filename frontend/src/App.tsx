@@ -17,7 +17,7 @@ function App() {
         },
       }}
     >
-      <Container maxWidth="md" sx={{ height: '100vh', py: 4 }}>
+      <Container maxWidth="lg" sx={{ height: '100vh', py: 4 }}>
         <Box sx={{ mb: 3, textAlign: 'center' }}>
           <Box
             sx={{
