@@ -22,7 +22,7 @@ app.get('/api/health', (req, res) => {
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const message = req.body.text;
 
     // Validate input
     if (!message || typeof message !== 'string') {
@@ -38,7 +38,7 @@ app.post('/api/chat', async (req, res) => {
     // 2. Initialize the GoogleGenerativeAI client with your API key
     const genAI = new GoogleGenerativeAI(apiKey);
     // 3. Get a model instance (recommended: 'gemini-2.5-flash')
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     // 4. Construct a prompt with the user's message
     const prompt = `User: ${message}\nAI:`;
     // 5. Call generateContent() with the prompt
