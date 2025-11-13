@@ -50,7 +50,7 @@ const ChatInterface = () => {
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.reply,
+        text: data.response,
         sender: 'bot',
         timestamp: new Date(),
       };
