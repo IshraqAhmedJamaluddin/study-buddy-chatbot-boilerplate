@@ -77,6 +77,17 @@ function App() {
   const generateThreadId = () => `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const createNewThread = () => {
+    // Check if there's already an empty chat (no messages)
+    const emptyThread = threads.find((t) => t.messages.length === 0);
+    
+    if (emptyThread) {
+      // Switch to existing empty chat instead of creating a new one
+      setCurrentThreadId(emptyThread.id);
+      setSidebarOpen(false);
+      return;
+    }
+    
+    // No empty chat exists, create a new one
     const newThread: Thread = {
       id: generateThreadId(),
       title: 'New Chat',
@@ -86,6 +97,7 @@ function App() {
     };
     setThreads((prev) => [newThread, ...prev]);
     setCurrentThreadId(newThread.id);
+    setSidebarOpen(false);
   };
 
   const switchThread = (threadId: string) => {
@@ -109,8 +121,6 @@ function App() {
       }
     }
   };
-
-  const currentThread = threads.find((t) => t.id === currentThreadId);
 
   return (
     <Box
