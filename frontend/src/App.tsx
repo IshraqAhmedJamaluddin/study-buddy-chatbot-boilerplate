@@ -322,7 +322,7 @@ function App() {
                 textShadow: '0 2px 10px rgba(0,0,0,0.2)',
               }}
             >
-              Your AI companion that's the cat's meow! 🐾
+              Your AI study companion
         </Typography>
           </Box>
           <ChatInterface currentThreadId={currentThreadId} threads={threads} setThreads={setThreads} setCurrentThreadId={setCurrentThreadId} />
