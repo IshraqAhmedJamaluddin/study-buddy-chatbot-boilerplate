@@ -37,11 +37,16 @@ app.get('/api/health', (req, res) => {
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, history } = req.body;
 
     // Validate input
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Message is required and must be a string' });
+    }
+
+    // Validate history if provided
+    if (history && !Array.isArray(history)) {
+      return res.status(400).json({ error: 'History must be an array' });
     }
 
     // Get Gemini API key from environment variable
@@ -57,14 +62,25 @@ app.post('/api/chat', async (req, res) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
+    // Build conversation context from history
+    let conversationContext = '';
+    if (history && history.length > 0) {
+      conversationContext = '\n\nPrevious conversation:\n';
+      history.forEach((entry) => {
+        const role = entry.role === 'user' ? 'Student' : 'Whiskers';
+        conversationContext += `${role}: ${entry.content}\n`;
+      });
+      conversationContext += '\n';
+    }
+
     // Make API call to Gemini
     const prompt = `You are Whiskers, a helpful AI assistant for ITI students who likes cats and occasionally uses cat puns. 
     Your personality is friendly, encouraging, and playful. You can occasionally use a cat pun when it feels natural and fits the context, but don't overdo it - focus on being helpful and clear first.
     Examples of cat puns you might use occasionally: "That's purrfect!", "Let me paws and think about that", "I'm feline good about this answer", etc. Use them sparingly and only when they feel natural.
     Answer questions clearly and concisely. Be friendly and encouraging. Cat puns are optional and should be used lightly, not forced into every response.
     IMPORTANT: Do NOT use em dashes in your responses. Use regular hyphens (-) or commas instead.
-    
-    Student question: ${message}`;
+    ${conversationContext}
+    Current student question: ${message}`;
 
     try {
       const result = await model.generateContent(prompt);
