@@ -27,8 +27,16 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required and must be a string' });
     }
 
-    // TODO: Get Gemini API key from environment variable
-    // const apiKey = process.env.GEMINI_API_KEY;
+    // Load Gemini API key securely from environment variables
+dotenv.config();
+
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error('❌ Missing GEMINI_API_KEY in environment variables');
+  process.exit(1);
+}
+
 
     // TODO: Make API call to Gemini
     // You will need to:
