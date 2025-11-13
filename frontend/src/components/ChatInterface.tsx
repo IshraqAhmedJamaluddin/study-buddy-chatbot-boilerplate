@@ -13,6 +13,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import { Message } from '../types';
 
+
 const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -27,17 +28,28 @@ const ChatInterface = () => {
       sender: 'user',
       timestamp: new Date(),
     };
-
+    console.log("User message🤞🤞: ", userMessage)
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
-
+    
     try {
       // TODO: Make API call to /api/chat endpoint
       // You will need to:
       // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
+      const res = await fetch(
+        `http://localhost:3001/api/chat`,{
+          method: 'POST',
+          headers:{
+            'Content-Type' : 'Application/json'
+          },
+          body: JSON.stringify(userMessage)
+        }
+      )
       // 2. Send the user's message in the request body: { message: input }
       // 3. Handle the response from the backend
+      const chatpotResponse = await res.json();
+      console.log("AI Response: ", chatpotResponse)
       // 4. Create a bot message with the response
       // 5. Add the bot message to the messages state
 
@@ -46,7 +58,7 @@ const ChatInterface = () => {
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
+        text: chatpotResponse.response,
         sender: 'bot',
         timestamp: new Date(),
       };
