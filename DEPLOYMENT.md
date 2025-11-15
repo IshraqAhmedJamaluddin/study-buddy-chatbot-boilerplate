@@ -31,7 +31,11 @@ This project uses a hybrid deployment strategy:
 
 4. **Deploy:**
    - Railway will automatically build and deploy
-   - Note the generated URL (e.g., `https://your-backend.railway.app`)
+   - Once deployed, find your backend URL in one of these locations:
+     - **Option 1**: Click on your service → Look at the top of the service dashboard for the "Public Domain" or "Generate Domain" button
+     - **Option 2**: Go to your service → Settings tab → Domains section → You'll see your public URL (e.g., `https://your-project-name-production.up.railway.app`)
+     - **Option 3**: Check the service overview page - Railway displays the public URL after successful deployment
+   - Copy this URL - you'll need it for your frontend configuration
 
 ## Frontend Deployment (GitHub Pages)
 
