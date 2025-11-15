@@ -80,8 +80,16 @@ Before you begin, make sure you have:
 
 ### 1. Implement Backend API Integration
 
-In `backend/server.js`, find the TODO comments in the `/api/chat` endpoint. You need to:
+First, install the Gemini API package in the backend directory:
+```bash
+cd backend
+npm install @google/generative-ai
+```
+
+Then, in `backend/server.js`, find the TODO comments in the `/api/chat` endpoint. You need to:
+- Import the GoogleGenerativeAI SDK
 - Extract the Gemini API key from environment variables
+- Initialize the Gemini client and get a model instance (recommended: 'gemini-2.5-flash')
 - Make an API call to Google's Gemini API
 - Return the chatbot's response to the frontend
 
@@ -91,6 +99,17 @@ In `frontend/src/components/ChatInterface.tsx`, find the TODO comment in the `ha
 - Make a POST request to `http://localhost:3001/api/chat`
 - Send the user's message in the request body
 - Handle the response and display it in the chat interface
+
+### 3. Customize the UI (Optional)
+
+Feel free to make the chat interface look as pretty as you want! You can:
+- Customize colors, fonts, and styling
+- Add animations or transitions
+- Improve the layout and user experience
+- Add new features like message timestamps, user avatars, or emoji support
+- Experiment with Material-UI components or add your own custom styles
+
+Remember, while making it look good is fun, the main focus of this project is learning Git and GitHub workflows.
 
 ## Git and GitHub Workflow
 
