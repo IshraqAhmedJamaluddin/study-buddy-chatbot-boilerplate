@@ -33,33 +33,36 @@ const ChatInterface = () => {
     setLoading(true);
 
     try {
-      // TODO: Make API call to /api/chat endpoint
-      // You will need to:
-      // 1. Use fetch or axios to POST to 'http://localhost:3001/api/chat'
-      // 2. Send the user's message in the request body: { message: input }
-      // 3. Handle the response from the backend
-      // 4. Create a bot message with the response
-      // 5. Add the bot message to the messages state
+      // ? REAL API CALL TO BACKEND ?
+      const response = await fetch('http://localhost:3000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage.text }),
+      });
 
-      // Placeholder: Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const data = await response.json();
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'This is a placeholder response. Implement API call here.',
+        text: data.response, // Gemini response
         sender: 'bot',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
+
     } catch (error) {
       console.error('Error sending message:', error);
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Error: Could not get response from server. Check your backend connection.',
+        text: '? Error: Could not connect to backend. Make sure the server is running.',
         sender: 'bot',
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -114,12 +117,16 @@ const ChatInterface = () => {
                     primary={message.text}
                     secondary={message.timestamp.toLocaleTimeString()}
                     secondaryTypographyProps={{
-                      color: message.sender === 'user' ? 'rgba(255,255,255,0.7)' : 'text.secondary',
+                      color:
+                        message.sender === 'user'
+                          ? 'rgba(255,255,255,0.7)'
+                          : 'text.secondary',
                     }}
                   />
                 </Paper>
               </ListItem>
             ))}
+
             {loading && (
               <ListItem sx={{ justifyContent: 'flex-start' }}>
                 <CircularProgress size={24} />
@@ -128,6 +135,7 @@ const ChatInterface = () => {
           </List>
         )}
       </Paper>
+
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
@@ -153,4 +161,3 @@ const ChatInterface = () => {
 };
 
 export default ChatInterface;
-
