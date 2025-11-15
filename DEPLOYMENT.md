@@ -112,6 +112,17 @@ VITE_API_URL=https://your-backend.railway.app npm run build
 - **API calls failing**: Check that `VITE_API_URL` secret is set correctly in GitHub
 - **Build errors**: Check GitHub Actions logs for detailed error messages
 - **404 errors**: Verify GitHub Pages is enabled and source is set to "GitHub Actions"
+- **Branch not allowed to deploy error**: If you see "Branch 'X' is not allowed to deploy to github-pages due to environment protection rules":
+  1. Go to your repository on GitHub
+  2. Navigate to **Settings** → **Environments** → **github-pages**
+  3. Under **Deployment branches**, you'll see branch protection rules
+  4. Choose one of these options:
+     - **Option A (Recommended)**: Add your branch to allowed branches:
+       - Click "Selected branches" or "Add branch" button
+       - Enter your branch name (e.g., `teacher-solution`)
+       - Click "Save protection rules"
+     - **Option B**: Allow all branches by selecting "All branches" (less secure but simpler)
+  5. Retry your deployment
 
 ### Workflow Issues
 
