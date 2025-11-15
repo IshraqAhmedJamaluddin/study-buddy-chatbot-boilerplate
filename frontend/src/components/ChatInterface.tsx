@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -10,20 +10,21 @@ import {
   ListItemText,
   CircularProgress,
   Avatar,
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import ReactMarkdown from 'react-markdown';
-import { Message, Thread } from '../types';
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import ReactMarkdown from "react-markdown";
+import { Message, Thread } from "../types";
 
-const THREADS_STORAGE_KEY = 'whiskers-threads';
-const CURRENT_THREAD_KEY = 'whiskers-current-thread';
+const THREADS_STORAGE_KEY = "whiskers-threads";
+const CURRENT_THREAD_KEY = "whiskers-current-thread";
 
-const generateThreadId = () => `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateThreadId = () =>
+  `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 const generateThreadTitle = (firstMessage: string): string => {
   // Generate title from first message (first 50 chars)
   const title = firstMessage.trim().slice(0, 50);
-  return title || 'New Chat';
+  return title || "New Chat";
 };
 
 interface ChatInterfaceProps {
@@ -33,11 +34,15 @@ interface ChatInterfaceProps {
   setCurrentThreadId: (id: string | null) => void;
 }
 
-const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadId }: ChatInterfaceProps) => {
+const ChatInterface = ({
+  currentThreadId,
+  threads,
+  setThreads,
+  setCurrentThreadId,
+}: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-
 
   // Save threads to localStorage whenever threads change
   useEffect(() => {
@@ -67,14 +72,19 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
     }
   }, [currentThreadId, threads]);
 
-
-  const updateThread = (threadId: string, newMessages: Message[], title?: string) => {
+  const updateThread = (
+    threadId: string,
+    newMessages: Message[],
+    title?: string
+  ) => {
     setThreads((prev) =>
       prev.map((thread) => {
         if (thread.id === threadId) {
-          const updatedTitle = title || (newMessages.length > 0 && newMessages[0].sender === 'user'
-            ? generateThreadTitle(newMessages[0].text)
-            : thread.title);
+          const updatedTitle =
+            title ||
+            (newMessages.length > 0 && newMessages[0].sender === "user"
+              ? generateThreadTitle(newMessages[0].text)
+              : thread.title);
           return {
             ...thread,
             messages: newMessages,
@@ -93,7 +103,7 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
-      sender: 'user',
+      sender: "user",
       timestamp: new Date(),
     };
 
@@ -110,7 +120,10 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
       setThreads((prev) => [newThread, ...prev]);
       threadId = newThread.id;
       setCurrentThreadId(threadId);
-      localStorage.setItem(THREADS_STORAGE_KEY, JSON.stringify([newThread, ...threads]));
+      localStorage.setItem(
+        THREADS_STORAGE_KEY,
+        JSON.stringify([newThread, ...threads])
+      );
       localStorage.setItem(CURRENT_THREAD_KEY, threadId);
     }
 
@@ -119,24 +132,23 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
     if (threadId) {
       updateThread(threadId, updatedMessages);
     }
-    setInput('');
+    setInput("");
     setLoading(true);
 
     try {
-      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
+      const apiUrl =
+        (import.meta as any).env.VITE_API_URL || "http://localhost:3001";
 
       // Prepare conversation history for context (last 10 messages to avoid token limits)
-      const conversationHistory = updatedMessages
-        .slice(-10)
-        .map((msg) => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text,
-        }));
+      const conversationHistory = updatedMessages.slice(-10).map((msg) => ({
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.text,
+      }));
 
       const response = await fetch(`${apiUrl}/api/chat`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: userMessage.text,
@@ -145,7 +157,9 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error occurred" }));
         throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
@@ -153,8 +167,8 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.response || 'No response received from the server.',
-        sender: 'bot',
+        text: data.response || "No response received from the server.",
+        sender: "bot",
         timestamp: new Date(),
       };
 
@@ -164,16 +178,17 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
         updateThread(threadId, finalMessages);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      
-      const errorText = error instanceof Error 
-        ? `Error: ${error.message}` 
-        : 'Error: Could not get response from server. Check your backend connection.';
-      
+      console.error("Error sending message:", error);
+
+      const errorText =
+        error instanceof Error
+          ? `Error: ${error.message}`
+          : "Error: Could not get response from server. Check your backend connection.";
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: errorText,
-        sender: 'bot',
+        sender: "bot",
         timestamp: new Date(),
       };
 
@@ -188,290 +203,304 @@ const ChatInterface = ({ currentThreadId, threads, setThreads, setCurrentThreadI
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 200px)' }}>
-
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <Paper
-          elevation={8}
+        elevation={8}
         sx={{
           flex: 1,
-          overflow: 'auto',
+          overflow: "auto",
           mb: 2,
           p: 2,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 4,
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          minHeight: 0,
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          borderRadius: 4,
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
         }}
       >
         {messages.length === 0 ? (
-            <Box sx={{ textAlign: 'center', mt: 8 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  mb: 2,
-                  fontSize: '4rem',
-                  animation: 'bounce 2s infinite',
-                  '@keyframes bounce': {
-                    '0%, 100%': { transform: 'translateY(0)' },
-                    '50%': { transform: 'translateY(-20px)' },
-                  },
-                }}
-              >
-                🐱
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#667eea',
-                  fontWeight: 600,
-                  mb: 1,
-                }}
-              >
-                Meow there! 👋
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                Start a purrfect conversation with Whiskers!
+          <Box sx={{ textAlign: "center", mt: 8 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 2,
+                fontSize: "4rem",
+                animation: "bounce 2s infinite",
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "translateY(0)" },
+                  "50%": { transform: "translateY(-20px)" },
+                },
+              }}
+            >
+              🐱
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "#667eea",
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              Meow there! 👋
+            </Typography>
+            <Typography variant="body1" sx={{ color: "text.secondary" }}>
+              Start a purrfect conversation with Whiskers!
             </Typography>
           </Box>
         ) : (
-            <List sx={{ py: 0 }}>
+          <List sx={{ py: 0 }}>
             {messages.map((message) => (
               <ListItem
                 key={message.id}
                 sx={{
-                  justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                    mb: 2,
-                    alignItems: 'flex-end',
-                  }}
-                >
-                  {message.sender === 'bot' && (
-                    <Avatar
-                      sx={{
-                        bgcolor: '#FF6B6B',
-                        mr: 1,
-                        mb: 0.5,
-                        width: 40,
-                        height: 40,
-                        fontSize: '1.5rem',
-                      }}
-                    >
-                      🐱
-                    </Avatar>
-                  )}
-                <Paper
-                    elevation={2}
-                  sx={{
-                    p: 2,
-                    maxWidth: '70%',
-                      borderRadius: 3,
-                      background: message.sender === 'user'
-                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                        : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                      color: '#fff',
-                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-                      },
-                      '& .markdown-content': {
-                        color: '#fff',
-                        '& p': {
-                          margin: '0 0 8px 0',
-                          '&:last-child': {
-                            marginBottom: 0,
-                          },
-                        },
-                        '& h1, & h2, & h3, & h4, & h5, & h6': {
-                          margin: '12px 0 8px 0',
-                          color: '#fff',
-                          fontWeight: 600,
-                          '&:first-child': {
-                            marginTop: 0,
-                          },
-                        },
-                        '& h1': { fontSize: '1.5rem' },
-                        '& h2': { fontSize: '1.3rem' },
-                        '& h3': { fontSize: '1.1rem' },
-                        '& ul, & ol': {
-                          margin: '8px 0',
-                          paddingLeft: '20px',
-                        },
-                        '& li': {
-                          margin: '4px 0',
-                        },
-                        '& code': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '0.9em',
-                          fontFamily: 'monospace',
-                        },
-                        '& pre': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                          padding: '12px',
-                          borderRadius: '6px',
-                          overflow: 'auto',
-                          margin: '8px 0',
-                          '& code': {
-                            backgroundColor: 'transparent',
-                            padding: 0,
-                          },
-                        },
-                        '& blockquote': {
-                          borderLeft: '3px solid rgba(255, 255, 255, 0.5)',
-                          paddingLeft: '12px',
-                          margin: '8px 0',
-                          fontStyle: 'italic',
-                        },
-                        '& a': {
-                          color: '#fff',
-                          textDecoration: 'underline',
-                          '&:hover': {
-                            opacity: 0.8,
-                          },
-                        },
-                        '& strong': {
-                          fontWeight: 600,
-                        },
-                        '& em': {
-                          fontStyle: 'italic',
-                        },
-                      },
-                    }}
-                  >
-                    {message.sender === 'bot' ? (
-                      <Box>
-                        <Box className="markdown-content">
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: 'rgba(255,255,255,0.8)',
-                            fontSize: '0.75rem',
-                            display: 'block',
-                            mt: 1,
-                          }}
-                        >
-                          {message.timestamp.toLocaleTimeString()}
-                        </Typography>
-                      </Box>
-                    ) : (
-                  <ListItemText
-                    primary={message.text}
-                    secondary={message.timestamp.toLocaleTimeString()}
-                        primaryTypographyProps={{
-                          sx: { wordBreak: 'break-word', lineHeight: 1.6 },
-                        }}
-                    secondaryTypographyProps={{
-                          color: 'rgba(255,255,255,0.8)',
-                          fontSize: '0.75rem',
-                    }}
-                  />
-                    )}
-                </Paper>
-                  {message.sender === 'user' && (
-                    <Avatar
-                      sx={{
-                        bgcolor: '#4D96FF',
-                        ml: 1,
-                        mb: 0.5,
-                        width: 40,
-                        height: 40,
-                      }}
-                    >
-                      👤
-                    </Avatar>
-                  )}
-              </ListItem>
-            ))}
-            {loading && (
-                <ListItem sx={{ justifyContent: 'flex-start', alignItems: 'center' }}>
+                  justifyContent:
+                    message.sender === "user" ? "flex-end" : "flex-start",
+                  mb: 2,
+                  alignItems: "flex-end",
+                }}
+              >
+                {message.sender === "bot" && (
                   <Avatar
                     sx={{
-                      bgcolor: '#FF6B6B',
+                      bgcolor: "#FF6B6B",
                       mr: 1,
+                      mb: 0.5,
                       width: 40,
                       height: 40,
-                      fontSize: '1.5rem',
+                      fontSize: "1.5rem",
                     }}
                   >
                     🐱
                   </Avatar>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CircularProgress size={20} sx={{ color: '#f5576c' }} />
-                    <Typography variant="body2" sx={{ color: 'text.secondary', ml: 1 }}>
-                      Thinking...
-                    </Typography>
-                  </Box>
+                )}
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    maxWidth: "70%",
+                    borderRadius: 3,
+                    background:
+                      message.sender === "user"
+                        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                        : "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                    color: "#fff",
+                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+                    transition: "transform 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                    },
+                    "& .markdown-content": {
+                      color: "#fff",
+                      "& p": {
+                        margin: "0 0 8px 0",
+                        "&:last-child": {
+                          marginBottom: 0,
+                        },
+                      },
+                      "& h1, & h2, & h3, & h4, & h5, & h6": {
+                        margin: "12px 0 8px 0",
+                        color: "#fff",
+                        fontWeight: 600,
+                        "&:first-child": {
+                          marginTop: 0,
+                        },
+                      },
+                      "& h1": { fontSize: "1.5rem" },
+                      "& h2": { fontSize: "1.3rem" },
+                      "& h3": { fontSize: "1.1rem" },
+                      "& ul, & ol": {
+                        margin: "8px 0",
+                        paddingLeft: "20px",
+                      },
+                      "& li": {
+                        margin: "4px 0",
+                      },
+                      "& code": {
+                        backgroundColor: "rgba(0, 0, 0, 0.3)",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontSize: "0.9em",
+                        fontFamily: "monospace",
+                      },
+                      "& pre": {
+                        backgroundColor: "rgba(0, 0, 0, 0.3)",
+                        padding: "12px",
+                        borderRadius: "6px",
+                        overflow: "auto",
+                        margin: "8px 0",
+                        "& code": {
+                          backgroundColor: "transparent",
+                          padding: 0,
+                        },
+                      },
+                      "& blockquote": {
+                        borderLeft: "3px solid rgba(255, 255, 255, 0.5)",
+                        paddingLeft: "12px",
+                        margin: "8px 0",
+                        fontStyle: "italic",
+                      },
+                      "& a": {
+                        color: "#fff",
+                        textDecoration: "underline",
+                        "&:hover": {
+                          opacity: 0.8,
+                        },
+                      },
+                      "& strong": {
+                        fontWeight: 600,
+                      },
+                      "& em": {
+                        fontStyle: "italic",
+                      },
+                    },
+                  }}
+                >
+                  {message.sender === "bot" ? (
+                    <Box>
+                      <Box className="markdown-content">
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "rgba(255,255,255,0.8)",
+                          fontSize: "0.75rem",
+                          display: "block",
+                          mt: 1,
+                        }}
+                      >
+                        {message.timestamp.toLocaleTimeString()}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <ListItemText
+                      primary={message.text}
+                      secondary={message.timestamp.toLocaleTimeString()}
+                      primaryTypographyProps={{
+                        sx: { wordBreak: "break-word", lineHeight: 1.6 },
+                      }}
+                      secondaryTypographyProps={{
+                        color: "rgba(255,255,255,0.8)",
+                        fontSize: "0.75rem",
+                      }}
+                    />
+                  )}
+                </Paper>
+                {message.sender === "user" && (
+                  <Avatar
+                    sx={{
+                      bgcolor: "#4D96FF",
+                      ml: 1,
+                      mb: 0.5,
+                      width: 40,
+                      height: 40,
+                    }}
+                  >
+                    👤
+                  </Avatar>
+                )}
+              </ListItem>
+            ))}
+            {loading && (
+              <ListItem
+                sx={{ justifyContent: "flex-start", alignItems: "center" }}
+              >
+                <Avatar
+                  sx={{
+                    bgcolor: "#FF6B6B",
+                    mr: 1,
+                    width: 40,
+                    height: 40,
+                    fontSize: "1.5rem",
+                  }}
+                >
+                  🐱
+                </Avatar>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} sx={{ color: "#f5576c" }} />
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", ml: 1 }}
+                  >
+                    Thinking...
+                  </Typography>
+                </Box>
               </ListItem>
             )}
           </List>
         )}
       </Paper>
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
+      <Box sx={{ display: "flex", gap: 1.5 }}>
         <TextField
           fullWidth
           variant="outlined"
-            placeholder="Type your message... 🐾"
+          placeholder="Type your message... 🐾"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={loading}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 3,
-                '& fieldset': {
-                  borderColor: 'rgba(102, 126, 234, 0.3)',
-                  borderWidth: 2,
-                },
-                '&:hover fieldset': {
-                  borderColor: 'rgba(102, 126, 234, 0.5)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#667eea',
-                },
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              borderRadius: 3,
+              "& fieldset": {
+                borderColor: "rgba(102, 126, 234, 0.3)",
+                borderWidth: 2,
               },
-            }}
+              "&:hover fieldset": {
+                borderColor: "rgba(102, 126, 234, 0.5)",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#667eea",
+              },
+            },
+          }}
         />
         <Button
           variant="contained"
           endIcon={<SendIcon />}
           onClick={handleSend}
           disabled={loading || !input.trim()}
-            sx={{
-              minWidth: 120,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: 3,
-              textTransform: 'none',
-              fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
-                transform: 'translateY(-2px)',
-              },
-              '&:disabled': {
-                background: 'rgba(102, 126, 234, 0.3)',
-              },
-              transition: 'all 0.3s ease',
-            }}
+          sx={{
+            minWidth: 120,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 600,
+            boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
+              boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+              transform: "translateY(-2px)",
+            },
+            "&:disabled": {
+              background: "rgba(102, 126, 234, 0.3)",
+            },
+            transition: "all 0.3s ease",
+          }}
         >
           Send
         </Button>
-        </Box>
       </Box>
+    </Box>
   );
 };
 

@@ -288,11 +288,23 @@ function App() {
         sx={{
           ml: sidebarOpen ? `${drawerWidth}px` : 0,
           transition: 'margin-left 0.3s ease',
-          py: 4,
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="lg" sx={{ height: '100vh', py: 4 }}>
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Container 
+          maxWidth="lg" 
+          sx={{ 
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            py: 2,
+            overflow: 'hidden',
+          }}
+        >
+          <Box sx={{ mb: 2, textAlign: 'center', flexShrink: 0 }}>
             <Box
               sx={{
                 mb: 1,
@@ -335,7 +347,9 @@ function App() {
               Your AI study companion
         </Typography>
           </Box>
-          <ChatInterface currentThreadId={currentThreadId} threads={threads} setThreads={setThreads} setCurrentThreadId={setCurrentThreadId} />
+          <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <ChatInterface currentThreadId={currentThreadId} threads={threads} setThreads={setThreads} setCurrentThreadId={setCurrentThreadId} />
+          </Box>
         </Container>
       </Box>
     </Box>
