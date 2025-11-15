@@ -31,8 +31,15 @@ This project uses a hybrid deployment strategy:
    - Go to your backend service → Variables tab
    - Add the following:
      - `GEMINI_API_KEY` = your Gemini API key
-     - `FRONTEND_URL` = your GitHub Pages URL (e.g., `https://yourusername.github.io/repo-name`)
-     - `PORT` = Railway sets this automatically
+     - `FRONTEND_URL` = your GitHub Pages base domain (without the repository path)
+       - **Important**: Must include the `https://` protocol
+       - **Important**: Must NOT include a trailing slash `/`
+       - **Important**: Do NOT include the repository name/path - only use the base domain
+       - **Examples**:
+         - If your GitHub Pages URL is `https://ishraqahmedjamaluddin.github.io/study-buddy-chatbot-boilerplate`, set `FRONTEND_URL=https://ishraqahmedjamaluddin.github.io` (without the repo path)
+         - If your GitHub Pages URL is `https://ishraqahmedjamaluddin.github.io`, set `FRONTEND_URL=https://ishraqahmedjamaluddin.github.io`
+       - **Note**: The origin for CORS is just the domain (e.g., `https://username.github.io`), not the full path
+     - `PORT` = Railway sets this automatically (do not set this manually)
 
 4. **Deploy:**
    - Railway will automatically build and deploy
@@ -92,8 +99,12 @@ VITE_API_URL=https://your-backend.railway.app npm run build
 ### Backend (Railway)
 
 - `GEMINI_API_KEY` - Your Gemini API key (required)
-- `FRONTEND_URL` - Your GitHub Pages frontend URL (required for CORS)
-- `PORT` - Automatically set by Railway
+- `FRONTEND_URL` - Your GitHub Pages base domain (required for CORS)
+  - **Format**: Must be `https://yourusername.github.io` (only the base domain, no repository path)
+  - **Critical**: Include `https://` protocol, do NOT include trailing slash `/`, do NOT include repository name/path
+  - **Example**: If your site is at `https://ishraqahmedjamaluddin.github.io/study-buddy-chatbot-boilerplate`, set `FRONTEND_URL=https://ishraqahmedjamaluddin.github.io` (without the repo path)
+  - **Note**: CORS uses the origin (domain only), not the full URL path
+- `PORT` - Automatically set by Railway (do not set manually)
 
 ### Frontend (GitHub Pages)
 
@@ -103,7 +114,26 @@ VITE_API_URL=https://your-backend.railway.app npm run build
 
 ### Backend Issues
 
-- **CORS errors**: Make sure `FRONTEND_URL` is set correctly in Railway
+- **CORS errors** (e.g., "Access to fetch blocked by CORS policy"):
+  1. **Check that `FRONTEND_URL` is set correctly in Railway:**
+     - Go to Railway → Your backend service → Variables tab
+     - Verify `FRONTEND_URL` is set to your GitHub Pages **base domain only** (without the repository path)
+     - The origin for CORS is just the domain, not the full URL path
+     - Example: If your GitHub Pages site is at `https://ishraqahmedjamaluddin.github.io/study-buddy-chatbot-boilerplate`, then `FRONTEND_URL` should be set to `https://ishraqahmedjamaluddin.github.io` (without the repo path)
+  2. **Common mistakes:**
+     - ❌ Missing `https://` protocol: `ishraqahmedjamaluddin.github.io`
+     - ❌ Trailing slash: `https://ishraqahmedjamaluddin.github.io/`
+     - ❌ Including repository path: `https://ishraqahmedjamaluddin.github.io/study-buddy-chatbot-boilerplate`
+     - ❌ Wrong URL: Using backend URL instead of frontend URL
+     - ✅ Correct: `https://ishraqahmedjamaluddin.github.io` (base domain only, no repo path)
+  3. **After updating `FRONTEND_URL`:**
+     - Railway will automatically redeploy your service
+     - Wait for the deployment to complete (check the Deployments tab)
+     - Test again from your frontend
+  4. **Finding your base domain:**
+     - Go to your repository → Settings → Pages
+     - Check the URL shown under "Your site is live at"
+     - Use only the base domain part (e.g., `https://yourusername.github.io`) without any repository path
 - **API key errors**: Verify `GEMINI_API_KEY` is set in Railway environment variables
 - **Port issues**: Railway sets PORT automatically, don't hardcode it
 
